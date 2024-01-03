@@ -15,17 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from rest_framework import routers
-from .views import TreasureViewSets, ProfileViewSets
+from django.urls import path
+from treasure_hunt_backend import views
 
-router = routers.DefaultRouter()
-router.register(r'treasure', TreasureViewSets)
-router.register(r'users', ProfileViewSets)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    
     path('admin/', admin.site.urls),
+    path('treasures/', views.treasure_list,name='get-treasures'),
+    path('users/', views.users_list)
 ]
 
-urlpatterns += router.urls
