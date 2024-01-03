@@ -1,4 +1,4 @@
 # treasure-hunt
 
 user: admin
-password: password123
+password: admin
