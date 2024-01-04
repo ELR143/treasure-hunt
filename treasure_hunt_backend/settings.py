@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import dj_database_url
+import os
 from pathlib import Path
 
 from decouple import config
@@ -23,12 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY') or os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = os.environ.get("DEBUG","False").lower()== "true" 
+#os.environ.get("ALLOWED_HOSTS").split(" ")
+[config("ALLOWED_HOSTS")]
+ALLOWED_HOSTS =os.environ.get("ALLOWED_HOSTS").split(" ")
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -96,11 +98,12 @@ DATABASES = {
         'HOST': "localhost",
     }
 }
-
-if config('DJANGO_ENV') == 'production':
-    DATABASES['default']['TEST'] = {
-        'NAME': config('TEST_NAME')
-    }
+db_url= os.environ.get("DATABASE_URL")
+DATABASES["default"]= dj_database_url.parse(db_url)
+#if config('DJANGO_ENV') == 'production':
+#    db_url= os.environ.get("DATABASE_URL")
+ #   DATABASES["default"]= dj_database_url.parse(db_url)
+    
 
 
 # Password validation
