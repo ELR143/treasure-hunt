@@ -13,17 +13,24 @@ from ..models import Treasure
 ## Erroneous tests too (: 
 ###TESTS ARE RUN ALPHABETICALLY AND MUST START WITH test
 
+urlAll = reverse("treasure-list")
+urlError = reverse("treasure-detail", kwargs={"pk":2000})
+url1 = reverse("treasure-detail", kwargs={"pk":1})
+url2 = reverse("treasure-detail", kwargs={"pk":2})
+
+gold = {"name": "Gold", "latitude": 500, "longitude": 500}
+silver = {"name": "Silver", "latitude": 500, "longitude": 500}
+
 class TreasureGetTests(APITransactionTestCase): 
     reset_sequences = True
     
     def test_returns_all_treasures(self):
         # print("test_returns_all_treasures")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
-        self.client.post(url, {"name": "forFake", "latitude": 500, "longitude": 500}) 
+        self.client.post(urlAll, gold) 
+        self.client.post(urlAll, silver) 
         
-        response = self.client.get(url)
+        response = self.client.get(urlAll)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Treasure.objects.count(), 2)
@@ -32,26 +39,25 @@ class TreasureGetTests(APITransactionTestCase):
     def test_returns_a_single_treasure(self):
         # print("test_returns_a_single_treasure")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
-        self.client.post(url, {"name": "forFake", "latitude": 500, "longitude": 500}) 
+        self.client.post(urlAll, gold) 
+        self.client.post(urlAll, silver) 
         
-        response = self.client.get(reverse("treasure-detail", kwargs={"pk":1}))
+        response = self.client.get(url1)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {"id": 1, "name": "forReal", "latitude": 500, "longitude": 500})
+        self.assertEqual(response.data, {"id": 1, "name": "Gold", "latitude": 500, "longitude": 500})
         
     def test_error_when_treasure_to_get_cant_be_found(self):
         # print("test_error_when_treasure_cant_be_found")
         
-        response = self.client.get(reverse("treasure-detail", kwargs={"pk":2000}))
+        response = self.client.get(urlError)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         
     def test_accounts_for_empty_treasure_list(self):
         # print("test_accounts_for_empty_treasure_list")
         
-        response = self.client.get(reverse("treasure-list"))
+        response = self.client.get(urlAll)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Treasure.objects.count(), 0)
@@ -62,10 +68,9 @@ class TreasurePostTests(APITransactionTestCase):
     def test_creates_a_new_treasure(self):
         # print("test_creates_a_new_treasure")
         
-        url = reverse("treasure-list")
         self.assertEqual(Treasure.objects.count(), 0)        
         
-        response = self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
+        response = self.client.post(urlAll, gold) 
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Treasure.objects.count(), 1)
@@ -73,13 +78,12 @@ class TreasurePostTests(APITransactionTestCase):
     def test_can_make_treasure_with_same_name_in_different_location(self):
         # print("test_can_make_treasure_with_same_name_in_different_location")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
+        self.client.post(urlAll, gold) 
         
-        response = self.client.post(url, {"name": "forReal", "latitude": 1000, "longitude": 1000}) 
+        response = self.client.post(urlAll, {"name": "Gold", "latitude": 1000, "longitude": 1000}) 
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Treasure.objects.filter(name__exact="forReal").count(), 2)
+        self.assertEqual(Treasure.objects.filter(name__exact="Gold").count(), 2)
         self.assertEqual(Treasure.objects.filter(longitude__exact=500).count(), 1)
         
 class TreasurePatchTests(APITransactionTestCase): 
@@ -88,60 +92,55 @@ class TreasurePatchTests(APITransactionTestCase):
     def test_change_longitude_of_treasure(self):
         # print("test_change_longitude_of_treasure")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
-        self.client.post(url, {"name": "forFake", "latitude": 500, "longitude": 500}) 
+        self.client.post(urlAll, gold) 
+        self.client.post(urlAll, silver) 
         
         newData = {"longitude": 300}
-        response = self.client.patch(reverse("treasure-detail", kwargs={"pk":2}), newData)
+        response = self.client.patch(url2, newData)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Treasure.objects.get(name__exact="forFake").longitude, 300)
+        self.assertEqual(Treasure.objects.get(name__exact="Silver").longitude, 300)
     
     def test_change_latitude_of_treasure(self):
         # print("test_change_latitude_of_treasure")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
-        self.client.post(url, {"name": "forFake", "latitude": 500, "longitude": 500}) 
+        self.client.post(urlAll, gold) 
+        self.client.post(urlAll, silver) 
         
         newData = {"latitude": 300}
-        response = self.client.patch(reverse("treasure-detail", kwargs={"pk":2}), newData)
+        response = self.client.patch(url2, newData)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Treasure.objects.get(name__exact="forFake").latitude, 300)
+        self.assertEqual(Treasure.objects.get(name__exact="Silver").latitude, 300)
         
     def test_change_name_of_treasure(self):
         # print("test_change_name_of_treasure")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500}) 
-        self.client.post(url, {"name": "forFake", "latitude": 500, "longitude": 500}) 
+        self.client.post(urlAll, gold) 
         
-        newData = {"name": "forMaybe"}
-        response = self.client.patch(reverse("treasure-detail", kwargs={"pk":2}), newData)
+        newData = {"name": "Bronze"}
+        response = self.client.patch(url1, newData)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Treasure.objects.get(id__exact=2).name, "forMaybe")
+        self.assertEqual(Treasure.objects.get(id__exact=1).name, "Bronze")
     
 class TreasureDeleteTests(APITransactionTestCase): 
     reset_sequences = True
     
-    def test_remove_a_treasure(self):
+    def test_remove_a_specified_treasure(self):
         # print("test_remove_a_treasure")
         
-        url = reverse("treasure-list")
-        self.client.post(url, {"name": "forReal", "latitude": 500, "longitude": 500})         
-        self.client.post(url, {"name": "forFake", "latitude": 500, "longitude": 500})         
-        response = self.client.delete(reverse("treasure-detail", kwargs={"pk":2}))
+        self.client.post(urlAll, gold)         
+        self.client.post(urlAll, silver)         
+        response = self.client.delete(url2)
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Treasure.objects.count(), 1)
-        self.assertEqual(Treasure.objects.get(name__exact="forReal").name, "forReal")
+        self.assertEqual(Treasure.objects.get(name__exact="Gold").name, "Gold")
 
     def test__error_when_treasure_to_delete_cant_be_found(self):
         # print("test_error_when_treasure_cant_be_found")
         
-        response = self.client.delete(reverse("treasure-detail", kwargs={"pk":2000}))
+        response = self.client.delete(urlError)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
