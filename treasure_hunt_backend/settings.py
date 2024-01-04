@@ -1,3 +1,6 @@
+import dj-database-url
+import os
+
 """
 Django settings for treasure_hunt_backend project.
 
@@ -13,6 +16,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 from decouple import config
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -93,14 +97,15 @@ DATABASES = {
         'NAME': config('DB_NAME'),
         'USER': config('USER'),
         'PASSWORD': config('PASSWORD'),
-        'HOST': config("DATABASE_URL"),
+        'HOST': 'localhost',
     }
 }
 
-if config('DJANGO_ENV') == 'development':
-    DATABASES['default']['TEST'] = {
-        'NAME': config('TEST_NAME')
-    }
+if config('DJANGO_ENV') == 'production':
+    DATABASES = {
+	"default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
+  }
+    
 
 
 # Password validation
