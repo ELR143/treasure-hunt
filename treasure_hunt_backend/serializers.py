@@ -15,11 +15,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
-    def update(self, instance, validated_data):
-        if validated_data.get("password"):
-            instance.set_password(validated_data['password'])
-        instance.save()
-        return instance
+   # def update(self, instance, validated_data):
+    #    if validated_data.get("password"):
+     #       instance.set_password(validated_data['password'])
+      #  instance.save()
+       # return instance
         
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:

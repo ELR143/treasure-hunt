@@ -12,24 +12,25 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import dj_database_url
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
-from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
+dotenv_path = BASE_DIR / '.env'
+load_dotenv(dotenv_path=dotenv_path)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY') or os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG","False").lower()== "true" 
+DEBUG = os.environ.get("DEBUG","False").lower() == "true" 
 #os.environ.get("ALLOWED_HOSTS").split(" ")
-[config("ALLOWED_HOSTS")]
+#[config("ALLOWED_HOSTS")]
 ALLOWED_HOSTS =os.environ.get("ALLOWED_HOSTS").split(" ")
 
 REST_FRAMEWORK = {
@@ -92,14 +93,15 @@ WSGI_APPLICATION = 'treasure_hunt_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('DB_NAME'),
-        'USER': config('USER'),
-        'PASSWORD': config('PASSWORD'),
-        'HOST': "localhost",
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('USER'),
+        'PASSWORD': os.environ.get('PASSWORD'),
     }
 }
-db_url= os.environ.get("DATABASE_URL")
-DATABASES["default"]= dj_database_url.parse(db_url)
+database_url= os.environ.get("DATABASE_URL")
+DATABASES['default']=dj_database_url.parse(database_url)
+#db_url= os.environ.get("DATABASE_URL")
+#DATABASES["default"]= dj_database_url.parse(db_url)
 #if config('DJANGO_ENV') == 'production':
 #    db_url= os.environ.get("DATABASE_URL")
  #   DATABASES["default"]= dj_database_url.parse(db_url)
