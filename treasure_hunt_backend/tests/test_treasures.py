@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APITransactionTestCase
 from django.contrib.auth.models import User
 from ..models import Treasure
+from ...profile_images import magikarp
 
 # Treasures Endpoint
 ## Get a list of all available treasures 
